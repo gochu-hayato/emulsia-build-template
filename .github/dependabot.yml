@@ -1,0 +1,14 @@
+version: 2
+updates:
+  # npm パッケージの自動更新
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"      # 毎週実行
+      day: "monday"           # 月曜日
+      time: "09:00"           # 朝9時
+      timezone: "Asia/Tokyo"  # 日本時間
+    open-pull-requests-limit: 10  # 最大10個のPRを作成
+    labels:
+      - "dependencies"        # PRに「dependencies」ラベルを付ける
+    versioning-strategy: auto

@@ -1,0 +1,28 @@
+name: Test Claude Code
+
+on:
+  workflow_dispatch:
+
+jobs:
+  test-claude:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install Claude Code
+        run: npm install -g @anthropic-ai/claude-code
+
+      - name: Setup Claude credentials
+        run: |
+          mkdir -p ~/.claude
+          echo '${{ secrets.CLAUDE_CREDENTIALS }}' > ~/.claude/.credentials.json
+
+      - name: Run Claude Code
+        run: claude -p "このリポジトリのファイル数を教えて"

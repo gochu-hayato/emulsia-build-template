@@ -1,0 +1,56 @@
+name: Update Progress
+
+on:
+  pull_request:
+    types: [closed]
+    branches:
+      - develop
+
+jobs:
+  update-progress:
+    # PRがマージされた場合のみ実行
+    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          ref: develop
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Update PROGRESS.md
+        env:
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          PR_TITLE: ${{ github.event.pull_request.title }}
+          PR_BODY: ${{ github.event.pull_request.body }}
+          MERGED_AT: ${{ github.event.pull_request.merged_at }}
+          AUTHOR: ${{ github.event.pull_request.user.login }}
+          HEAD_BRANCH: ${{ github.event.pull_request.head.ref }}
+        run: |
+          DATE=$(echo $MERGED_AT | cut -d'T' -f1)
+
+          # PR本文が空の場合のデフォルト
+          if [ -z "$PR_BODY" ]; then
+            PR_BODY="- 詳細な説明なし"
+          fi
+
+          # PROGRESS.mdに追記
+          echo "" >> PROGRESS.md
+          echo "### $DATE PR#$PR_NUMBER $PR_TITLE" >> PROGRESS.md
+          echo "- **マージ日時:** $MERGED_AT" >> PROGRESS.md
+          echo "- **担当者:** @$AUTHOR" >> PROGRESS.md
+          echo "- **ブランチ:** \`$HEAD_BRANCH\` → \`develop\`" >> PROGRESS.md
+          echo "" >> PROGRESS.md
+          echo "**実装内容:**" >> PROGRESS.md
+          echo "$PR_BODY" >> PROGRESS.md
+          echo "" >> PROGRESS.md
+          echo "---" >> PROGRESS.md
+
+      - name: Commit and Push
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git add PROGRESS.md
+          git commit -m "docs: update PROGRESS.md for PR#${{ github.event.pull_request.number }}"
+          git push

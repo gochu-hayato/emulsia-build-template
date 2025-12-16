@@ -1,0 +1,21 @@
+rules_version = '2';
+
+service firebase.storage {
+  match /b/{bucket}/o {
+    // ========================================
+    // 🚧 開発中：テストモード（全て許可）
+    // ========================================
+    // ⚠️ 本番リリース前に必ず変更すること
+    //
+    // 本番用ルールの例：
+    // match /users/{userId}/{allPaths=**} {
+    //   allow read: if request.auth != null;
+    //   allow write: if request.auth != null && request.auth.uid == userId;
+    // }
+    // ========================================
+    
+    match /{allPaths=**} {
+      allow read, write: if true;  // 開発中のみ
+    }
+  }
+}

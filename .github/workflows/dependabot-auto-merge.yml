@@ -1,0 +1,27 @@
+name: Dependabot auto-merge
+
+on: pull_request  # PRが作成されたときに実行
+
+permissions:
+  contents: write         # リポジトリへの書き込み権限
+  pull-requests: write    # PRのマージ権限
+
+jobs:
+  dependabot:
+    runs-on: ubuntu-latest
+    if: github.actor == 'dependabot[bot]'  # Dependabotが作成したPRのみ
+
+    steps:
+      - name: Dependabot metadata
+        id: metadata
+        uses: dependabot/fetch-metadata@v2
+        with:
+          github-token: "${{ secrets.GITHUB_TOKEN }}"
+
+      - name: Auto-merge patch updates
+        # パッチ更新（1.0.0 → 1.0.1）のみ自動マージ
+        if: steps.metadata.outputs.update-type == 'version-update:semver-patch'
+        run: gh pr merge --auto --squash "$PR_URL"
+        env:
+          PR_URL: ${{ github.event.pull_request.html_url }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
